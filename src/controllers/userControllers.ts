@@ -18,6 +18,17 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     }
 }
 
+export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+    try {const userId: string = req.params.userId;
+     const users = await User.find().sort({createdAt: -1})
+     res.status(200).json({totalUsers: users.length, users});
+ }
+ catch (err) {
+     console.error('Error all users: ',err);
+     res.status(500).send('internal server error');
+ }
+ }
+
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
    try {const userId: string = req.params.userId;
     const user = await User.findById(userId);
