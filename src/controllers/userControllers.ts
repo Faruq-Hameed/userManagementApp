@@ -8,6 +8,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         //username will be generated automatically, 
         // also later profile pic will be added
         //user can be created with googleAuth credentials and others
+        //check if user already exists
 
         res.status(200).json({message: 'User created successfully', newUser})
     }

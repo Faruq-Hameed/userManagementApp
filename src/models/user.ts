@@ -13,34 +13,25 @@ export interface User extends Document{
 }
 
 const UserSchema: Schema = new Schema({
-    name: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
+    name: { type: String, required: [true, 'Name is required'] },
+    phoneNumber: { type: String, required: [true, 'Phone number is required'] },
+    password: { type: String, required: [true, 'Password is required'], minlength: [6, 'Password must be at least 6 characters'] },
+    username: { type: String, required: [true, 'Username is required'], unique: true },
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        validate: {
-            validator: (value: string) => {
-                // Example: Validate email format using a regular expression
-                return /^\S+@\S+\.\S+$/.test(value);
-            },
-            message: 'Invalid email format',
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      validate: {
+        validator: (value: string) => {
+          return /^\S+@\S+\.\S+$/.test(value);
         },
+        message: 'Invalid email format',
+      },
     },
-    password: {
-        type: String,
-        required: true,
-        minlength: 6,
-    },
-    username: { type: String, required: true, unique: true },
-    role: {
-        type: String,
-        enum: ['admin', 'manager', 'user'],
-        required: true
-    },
-    age: { type: Number, required: true },
-    country: { type: String, required: true },
-},
+    role: { type: String, required: [true, 'Role is required'] },
+    age: { type: Number, required: [true, 'Age is required'], min: [18, 'Minimum age is 18'] },
+    country: { type: String, required: [true, 'Country is required'] },
+  },
 {
     timestamps: true, // Add timestamps option
   }
@@ -65,3 +56,7 @@ UserSchema.pre<User>('save', async function (next) {
   });
 
   export default mongoose.model<User>('User', UserSchema);
+
+
+
+  
