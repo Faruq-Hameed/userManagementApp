@@ -69,7 +69,7 @@ export const deleteUserById = async (req: Request, res: Response): Promise<void>
     try{
         const userId: string = req.params.userId;
         const deletionResult = await User.deleteOne({_id: userId});
-        if(deletionResult.deletedCount > 0){
+        if(deletionResult.deletedCount < 0){
             res.status(404).json({message:'User not found'})
             return;
         }
