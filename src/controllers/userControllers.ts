@@ -4,11 +4,22 @@ import User, {User as UserType} from '../models/user';
 export const createUser = async (req: Request, res: Response): Promise<void> => {
     try{
         const userData: UserType = req.body;
+
+        const emailAlreadyExists: any = await User.findOne({email: userData.email}, "_id")
+        if(emailAlreadyExists ){
+            res.status(404).json({message:'email already exists'});
+            return;
+        }
+        const usernameAlreadyExists: any = await User.findOne({username: userData.username}, "_id")
+        if(usernameAlreadyExists){
+            res.status(404).json({message:'username already exists'});
+            return;
+        }
+
         const newUser = await User.create(userData);
         //username will be generated automatically, 
         // also later profile pic will be added
         //user can be created with googleAuth credentials and others
-        //check if user already exists
 
         res.status(200).json({message: 'User created successfully', newUser})
     }
@@ -48,6 +59,18 @@ catch (err) {
 export const updateUserById = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId: string = req.params.userId;
+
+        const emailAlreadyExists: any = await User.findOne({email: req.body.email}, "_id")
+        if(emailAlreadyExists && emailAlreadyExists._id.toString() !== userId){
+            res.status(404).json({message:'email already exists'});
+            return;
+        }
+        const usernameAlreadyExists: any = await User.findOne({username: req.body.username}, "_id")
+        if(usernameAlreadyExists && usernameAlreadyExists._id.toString() !== userId.toString()){
+            res.status(404).json({message:`username ${req.body.username} already exists`});
+            return;
+        }
+
         const updatedData: Partial<UserType> = req.body
         const updatedUser = await User.findByIdAndUpdate(userId, updatedData,{new: true} );
         if(!updatedUser)
