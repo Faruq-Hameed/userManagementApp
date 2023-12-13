@@ -1,5 +1,5 @@
-import {Document, Schema} from "mongoose";
-
+import mongoose, {Document, Schema,model} from "mongoose";
+import bcrypt from 'bcrypt';
 
 export interface User extends Document{
     name: string;
@@ -40,5 +40,28 @@ const UserSchema: Schema = new Schema({
     },
     age: { type: Number, required: true },
     country: { type: String, required: true },
-}
+},
+{
+    timestamps: true, // Add timestamps option
+  }
 )
+
+
+// Hash password before saving
+UserSchema.pre<User>('save', async function (next) {
+    const user = this;
+    if (!user.isModified('password')) {
+      return next();
+    }
+  
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(user.password, salt);
+      user.password = hashedPassword;
+      return next();
+    } catch (error: any) {
+      return next(error);
+    }
+  });
+
+  export default mongoose.model<User>('User', UserSchema);
