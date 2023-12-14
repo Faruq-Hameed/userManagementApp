@@ -67,8 +67,8 @@ export const updateUserById = async (req: Request, res: Response): Promise<void>
 
         const emailAlreadyExists: any = await User.findOne({email: req.body.email}, "_id")
         if(emailAlreadyExists && emailAlreadyExists._id.toString() !== userId){
-            res.status(404).json({message:'email already exists'});
-            return;
+            throw createNotFoundError('user')
+
         }
         const usernameAlreadyExists: any = await User.findOne({username: req.body.username}, "_id")
         if(usernameAlreadyExists && usernameAlreadyExists._id.toString() !== userId.toString()){
@@ -86,9 +86,14 @@ export const updateUserById = async (req: Request, res: Response): Promise<void>
         res.status(200).json({message: "user data updated successfully", updatedUser});
 
     }    
-    catch (err) {
-        console.error('Error updating user by ID: ',err);
-        res.status(500).send('internal server error');
+    catch (err: any) {
+        if (err.code === 404) {
+            res.status(err.code).json({ message: err.message });
+        }
+        else {
+            console.error('Error finding user by ID: ', err);
+            res.status(500).send('internal server error');
+        }
     }
     
 }
@@ -97,14 +102,18 @@ export const deleteUserById = async (req: Request, res: Response): Promise<void>
     try{
         const userId: string = req.params.userId;
         const deletionResult = await User.deleteOne({_id: userId});
-        if(deletionResult.deletedCount < 0){
-            res.status(404).json({message:'User not found'})
-            return;
+        if(deletionResult.deletedCount === 0){
+            throw createNotFoundError('user')
         }
         res.status(200).send('User deleted successfully');
     }
-    catch (err) {
-        console.error('Error deleting user by ID: ',err);
-        res.status(500).send('internal server error');
+    catch (err: any) {
+        if (err.code === 404) {
+            res.status(err.code).json({ message: err.message });
+        }
+        else {
+            console.error('Error finding user by ID: ', err);
+            res.status(500).send('internal server error');
+        }
     }
 }
