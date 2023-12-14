@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import User, {User as UserType} from '../models/user';
+import {createNotFoundError} from '../utils/errors';
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
     try{
@@ -45,15 +46,19 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
     const user = await User.findById(userId);
     //find user by email, phonumber, names and username will be implemented later
     if (!user) {
-        res.status(404).json({message:'User not found'})
-        return;
+       throw createNotFoundError('user')
     }
     res.status(200).json({message: "user found", user});
 }
-catch (err) {
-    console.error('Error finding user by ID: ',err);
-    res.status(500).send('internal server error');
-}
+    catch (err: any) {
+        if (err.code === 404) {
+            res.status(err.code).json({ message: err.message });
+        }
+        else {
+            console.error('Error finding user by ID: ', err);
+            res.status(500).send('internal server error');
+        }
+    }
 }
 
 export const updateUserById = async (req: Request, res: Response): Promise<void> => {
